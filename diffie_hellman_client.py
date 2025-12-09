@@ -10,8 +10,19 @@ from typing import Tuple
 def send_common_info(sock: socket.socket, server_address: str, server_port: int) -> Tuple[int, int]:
     # TODO: Connect to the server and propose a base number and prime
     # TODO: You can generate these randomly, or just use a fixed set
+    
+    # Primes under 100 for random selection
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    modulus = random.choice(primes)
+    # Base should theoretically be a primitive root, but for this assignment any small int > 1 is fine
+    # Ensuring base < modulus is standard
+    base = random.randint(2, modulus - 1)
+    
+    message = f"{base}\n{modulus}\n"
+    sock.sendall(message.encode())
+    
     # TODO: Return the tuple (base, prime modulus)
-    pass
+    return base, modulus
 
 # Do NOT modify this function signature, it will be used by the autograder
 def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int, int, int]:
@@ -22,6 +33,8 @@ def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int,
             print(f"Connected to server at {server_address}:{server_port}")
             
             # TODO: Send the proposed base and modulus number to the server using send_common_info
+            base, modulus = send_common_info(sock, server_address, server_port)
+            print(f"Sent base={base}, modulus={modulus}")
 
             # TODO: Come up with a random secret key
 

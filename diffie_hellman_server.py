@@ -7,10 +7,27 @@ from typing import Tuple
 
 
 # TODO feel free to use this helper or not
-def receive_common_info() -> Tuple[int, int]:
+def receive_common_info(conn: socket.socket) -> Tuple[int, int]:
     # TODO: Wait for a client message that sends a base number.
+    data = conn.recv(1024).decode()
+    if not data:
+        raise ValueError("Connection closed by client before sending common info")
+    
+    try:
+        parts = data.strip().split('\n')
+        if len(parts) < 2:
+             # Handle case where data might be fragmented (though unlikely for this small amount)
+             # Ideally we'd buffer, but for this assignment simple recv is usually okay
+             raise ValueError(f"Received incomplete data: {data}")
+             
+        base = int(parts[0])
+        modulus = int(parts[1])
+        return base, modulus
+    except ValueError as e:
+        print(f"Error parsing common info: {e}")
+        return 0, 0
+    
     # TODO: Return the tuple (base, prime modulus)
-    pass
 
 # Do NOT modify this function signature, it will be used by the autograder
 def dh_exchange_server(server_address: str, server_port: int) -> Tuple[int, int, int, int]:
@@ -26,6 +43,8 @@ def dh_exchange_server(server_address: str, server_port: int) -> Tuple[int, int,
             print(f"Connected by {addr}")
 
             # TODO: Read client's proposal for base and modulus using receive_common_info
+            base, modulus = receive_common_info(conn)
+            print(f"Received base={base}, modulus={modulus}")
 
             # TODO: Generate your own secret key
 
