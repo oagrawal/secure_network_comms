@@ -15,17 +15,27 @@ def receive_common_info() -> Tuple[int, int]:
 # Do NOT modify this function signature, it will be used by the autograder
 def dh_exchange_server(server_address: str, server_port: int) -> Tuple[int, int, int, int]:
     # TODO: Create a server socket. can be UDP or TCP.
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((server_address, server_port))
+        sock.listen(1)
+        print(f"Server listening on {server_address}:{server_port}...")
 
-    # TODO: Read client's proposal for base and modulus using receive_common_info
+        conn, addr = sock.accept()
+        with conn:
+            print(f"Connected by {addr}")
 
-    # TODO: Generate your own secret key
+            # TODO: Read client's proposal for base and modulus using receive_common_info
 
-    # TODO: Exchange messages with the client
+            # TODO: Generate your own secret key
 
-    # TODO: Compute the shared secret.
+            # TODO: Exchange messages with the client
 
-    # TODO: Return the base number, prime modulus, the secret integer, and the shared secret
-    pass
+            # TODO: Compute the shared secret.
+
+            # TODO: Return the base number, prime modulus, the secret integer, and the shared secret
+            # Placeholder return for now to allow testing
+            return (0, 0, 0, 0)
 
 def main(args):
     dh_exchange_server(args.address, args.port)

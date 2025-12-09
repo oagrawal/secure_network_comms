@@ -16,20 +16,28 @@ def send_common_info(sock: socket.socket, server_address: str, server_port: int)
 # Do NOT modify this function signature, it will be used by the autograder
 def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int, int, int]:
     # TODO: Create a socket 
-    
-    # TODO: Send the proposed base and modulus number to the server using send_common_info
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.connect((server_address, server_port))
+            print(f"Connected to server at {server_address}:{server_port}")
+            
+            # TODO: Send the proposed base and modulus number to the server using send_common_info
 
-    # TODO: Come up with a random secret key
+            # TODO: Come up with a random secret key
 
-    # TODO: Calculate the message the client sends using the secret integer.
+            # TODO: Calculate the message the client sends using the secret integer.
 
-    # TODO: Exhange messages with the server
+            # TODO: Exhange messages with the server
 
-    # TODO: Calculate the secret using your own secret key and server message
-    
-    # TODO: Return the base number, the modulus, the private key, and the shared secret
+            # TODO: Calculate the secret using your own secret key and server message
+            
+            # TODO: Return the base number, the modulus, the private key, and the shared secret
+        except ConnectionRefusedError:
+            print(f"Connection refused by {server_address}:{server_port}")
+            return (0, 0, 0, 0)
 
-    pass
+    # Placeholder return for now
+    return (0, 0, 0, 0)
 
 
 def main(args):
