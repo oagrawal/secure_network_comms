@@ -47,6 +47,12 @@ def dh_exchange_server(server_address: str, server_port: int) -> Tuple[int, int,
             print(f"Received base={base}, modulus={modulus}")
 
             # TODO: Generate your own secret key
+            # Secret should be in range [2, modulus-2]
+            secret_key = random.randint(2, max(2, modulus - 2))
+            print(f"Secret is {secret_key}")
+            
+            # Compute server public value: (base ^ secret_key) % modulus
+            public_value = pow(base, secret_key, modulus)
 
             # TODO: Exchange messages with the client
 
