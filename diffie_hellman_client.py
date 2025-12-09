@@ -46,16 +46,29 @@ def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int,
             public_value = pow(base, secret_key, modulus)
 
             # TODO: Exhange messages with the server
+            # Send client public value
+            sock.sendall(f"{public_value}\n".encode())
+            
+            # Receive server public value
+            # Use makefile to cleanly read the line response
+            with sock.makefile('r', encoding='utf-8') as f_obj:
+                line = f_obj.readline()
+                if not line:
+                    raise ValueError("Connection closed by server")
+                server_public_value = int(line.strip())
+            
+            print(f"Int received from peer is {server_public_value}")
 
             # TODO: Calculate the secret using your own secret key and server message
+            # Shared Secret = (server_public_value ^ secret_key) % modulus
+            shared_secret = pow(server_public_value, secret_key, modulus)
+            print(f"Shared secret is {shared_secret}")
             
             # TODO: Return the base number, the modulus, the private key, and the shared secret
-        except ConnectionRefusedError:
-            print(f"Connection refused by {server_address}:{server_port}")
+            return base, modulus, secret_key, shared_secret
+        except (ConnectionRefusedError, ValueError) as e:
+            print(f"Error: {e}")
             return (0, 0, 0, 0)
-
-    # Placeholder return for now
-    return (0, 0, 0, 0)
 
 
 def main(args):
