@@ -10,8 +10,19 @@ from typing import Tuple
 def send_common_info(sock: socket.socket, server_address: str, server_port: int) -> Tuple[int, int]:
     # TODO: Connect to the server and propose a base number and prime
     # TODO: You can generate these randomly, or just use a fixed set
+    
+    # Primes under 100 for random selection
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]
+    modulus = random.choice(primes)
+    # Base should theoretically be a primitive root, but for this assignment any small int > 1 is fine
+    # Ensuring base < modulus is standard
+    base = random.randint(2, modulus - 1)
+    
+    message = f"{base}\n{modulus}\n"
+    sock.sendall(message.encode())
+    
     # TODO: Return the tuple (base, prime modulus)
-    pass
+    return base, modulus
 
 # Do NOT modify this function signature, it will be used by the autograder
 def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int, int, int]:
@@ -22,22 +33,42 @@ def dh_exchange_client(server_address: str, server_port: int) -> Tuple[int, int,
             print(f"Connected to server at {server_address}:{server_port}")
             
             # TODO: Send the proposed base and modulus number to the server using send_common_info
+            base, modulus = send_common_info(sock, server_address, server_port)
+            print(f"Sent base={base}, modulus={modulus}")
 
             # TODO: Come up with a random secret key
+            # Secret should be in range [2, modulus-2] to be secure enough for this toy example
+            secret_key = random.randint(2, max(2, modulus - 2))
+            print(f"Secret is {secret_key}")
 
             # TODO: Calculate the message the client sends using the secret integer.
+            # Client Public Value = (base ^ secret_key) % modulus
+            public_value = pow(base, secret_key, modulus)
 
             # TODO: Exhange messages with the server
+            # Send client public value
+            sock.sendall(f"{public_value}\n".encode())
+            
+            # Receive server public value
+            # Use makefile to cleanly read the line response
+            with sock.makefile('r', encoding='utf-8') as f_obj:
+                line = f_obj.readline()
+                if not line:
+                    raise ValueError("Connection closed by server")
+                server_public_value = int(line.strip())
+            
+            print(f"Int received from peer is {server_public_value}")
 
             # TODO: Calculate the secret using your own secret key and server message
+            # Shared Secret = (server_public_value ^ secret_key) % modulus
+            shared_secret = pow(server_public_value, secret_key, modulus)
+            print(f"Shared secret is {shared_secret}")
             
             # TODO: Return the base number, the modulus, the private key, and the shared secret
-        except ConnectionRefusedError:
-            print(f"Connection refused by {server_address}:{server_port}")
+            return base, modulus, secret_key, shared_secret
+        except (ConnectionRefusedError, ValueError) as e:
+            print(f"Error: {e}")
             return (0, 0, 0, 0)
-
-    # Placeholder return for now
-    return (0, 0, 0, 0)
 
 
 def main(args):
